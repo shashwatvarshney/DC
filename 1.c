@@ -1,91 +1,78 @@
 #include<stdio.h>
 #include<omp.h>
 #include<stdlib.h>
-void merge(int* a,int l,int m,int r)
-{
-    int i=0,j=0;
-    int n1 = m - l + 1;
-    int n2 = r - m;
-    int L[n1],R[n2];
-    for(int i = 0;i < n1;i++)
-        L[i] = a[l + i];
-    for(int j = 0;j < n2;j++)
-        R[j] = a[m + 1 + j];
-    int k = l;
-    while(i < n1 & j < n2)
-    {
-        if(L[i] <= R[j])
-        {
-            a[k] = L[i];
-            i++;
-        }
-        else
-        {
-            a[k] = R[j];
-            j++;
-        }
-        k++;
-    }
-    while(i < n1)
-    {
-        a[k] = L[i];
-        i++;
-        k++;
-    }
-    while(j < n2)
-    {
-        a[k] = R[j];
-        j++;
-        k++;
-    }
-}
-void mergesort(int* a,int l,int r)
-{
-    if(l < r)
-    {
-        int m;
-        #pragma omp parallel sections
-        {
-            m = (l+r)/2;
-            #pragma omp section
-            {
-                mergesort(a,l,m);
-            }
-            #pragma omp section
-            {
-                mergesort(a,m+1,r);
-            }
-        }
-        merge(a,l,m,r);
-    }
-}
-void main()
-{
-    omp_set_nested(1);
-    int i,j,size;
-    printf("Enter the size of array\n");
-    scanf("%d",&size);
-    for(i = 0; i<4; i++)
-	{
-		int a[size];
-		for(j = 0; j<size; j++)
-		{
-			a[j] = rand()%100000;
+void merge(int a[],int l,int m,int r){
+	int n1,n2,i,j,k;
+	n1=m-l+1;
+	n2=r-m;
+	int L[n1],R[n2];
+	for(i=0;i<n1;i++)
+		L[i]=a[l+i];
+	for(j=0;j<n2;j++)
+		R[j]=a[m+j+1];
+	i=0;
+	k=l;
+	j=0;
+	while(i<n1 && j<n2){
+		if(L[i]<=R[j]){
+			a[k]=L[i];
+			i++;
+			}
+		else{
+			a[k]=R[j];
+			j++;
+			}
+		k++;
 		}
-		for(i = 0; i<4; i++)
-		{
-			omp_set_num_threads(2*(i));
-			double t1 = omp_get_wtime();
-			mergesort(a,0,size-1);
-			double t2 = omp_get_wtime();
-			printf("%lf\t",t2-t1);
+	while(i<n1){
+		a[k]=L[i];
+		i++;
+		k++;
 		}
-		printf("\n");
-		for(i = 0;i < size;i++)
-	    {
-			printf("%d\t",a[i]);
-	    }
-		printf("\n");
+	while(j<n2){
+		a[k]=R[j];
+		j++;
+		k++;
+		}
 	}
-    
-}
+void mergesort(int arr[],int l,int r){
+	if(l<r)
+	{
+		int mid;
+	#pragma omp parallel sections
+	{
+		mid=(l+r)/2;
+		#pragma omp section
+		{			printf("Thread id: %d \t mid:%d\n",omp_get_thread_num(),mid);
+			mergesort(arr,l,mid);
+		}
+		#pragma omp section
+		{	
+			printf("Thread id:%d \t mid+1:%d\n",omp_get_thread_num(),mid+1);
+			mergesort(arr,mid+1,r);
+		}
+	}
+		merge(arr,l,mid,r);
+		}
+	}
+void main(){
+	omp_set_nested(1);
+	int n,i;
+	printf("Enter n:\n");
+	scanf("%d",&n);
+	int arr[n];
+	for(i=0;i<n;i++)
+		arr[i]=rand()%100;
+	printf("Unsorted ARRAY:\n");
+	for(i=0;i<n;i++)
+		printf("%d ",arr[i]);
+	printf("\n");
+	
+	double t1=omp_get_wtime();
+	mergesort(arr,0,n-1);
+	double t2=omp_get_wtime();
+	printf("sorted ARRAY:\n");
+	for(i=0;i<n;i++)
+		printf("%d ",arr[i]);
+	printf("Time taken for sort:%lf s",t2-t1);
+	}
