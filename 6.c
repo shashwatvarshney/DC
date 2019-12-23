@@ -33,10 +33,11 @@ int main(int argc, char *argv[]) {
 			for(y=0; y<height; y++) {
 				color = x + 0;
 				color = gdImageGetPixel(img, x, y);
+				int avg=(gdImageRed(img, color)+gdImageGreen(img, color)+gdImageBlue(img, color))/3;
 				red   = 255 - gdImageRed(img, color);
 				green = 255 - gdImageGreen(img, color);
 				blue  = 255 - gdImageBlue(img, color);
-				color = gdImageColorAllocate(img, red, green, blue);
+				color = gdImageColorAllocate(img, avg, avg, avg);
 				gdImageSetPixel(img, x, y, color);
 	        }
 	    }
