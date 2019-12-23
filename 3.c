@@ -1,67 +1,52 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<omp.h>
+#include<stdbool.h>
 #include<math.h>
-int *primeTable(int prime_num)
-{
-	int i = 2,j,p = 0,flag;
-	int *primes = (int*)malloc(prime_num*sizeof(int));
-	while(p < prime_num)
-	{
-		flag = 1;
-		for(j = 2;j < i;j++)
-		{
-			if(i%j == 0)
-			{
-				flag = 0;
-				break;
+void primetable(int n){
+	bool primes[n+1];
+	int p,i;
+	memset(primes,true,sizeof(primes));
+	for(p=2;p*p<=n;p++){
+		if(primes[p]==true){
+			for(i=p*p;i<=n;i+=p)
+				primes[i]=false;
 			}
-		}
-		if(flag)
-		{
-			primes[p] = i;
-			p += 1;
-		}
-		i += 1;
 	}
-	return primes;
-}
-double *sineTable(int sine_num)
-{
+	for(p=2;p<=n;p++)
+		if(primes[p]==true)
+			printf("%d ",p);
+	printf("\n");
+	}
+
+void  sinetable(int n){
+	
+	double * sines=(double *)malloc(sizeof(double)*n);
 	int i,j;
-	double a,pi = 3.1415;
-	double *sines= (double*)malloc(sine_num * sizeof(double));
-	for(i = 0;i < sine_num;i++)
+	double pi=3.1421;
+	for(i=0;i<n;i++)
 	{
-		sines[i] = 0.0;
-		for(j = 0;j <= i;j++)
-		{
-			a = (double)(j) * pi / (double)(sine_num - 1);
-			sines[i] = sines[i] + sin(a);
-		}
+		sines[i]=sin(i*(pi/180));
+		
 	}
-	return sines;
-}
-void main()
-{
+
+	printf("Sine table:\n");
+	for(i=0;i<n;i++)
+		printf("sin(%d)=%lf\n",i,sines[i]);
+	}
+
+void main(){
 	int size;
-	printf("Enter size till which prime Table and sine Table is found\n");
 	scanf("%d",&size);
 	#pragma omp parallel sections
 	{
-		#pragma omp secton
+		#pragma omp section
 		{
-			int *a = (int*)malloc(size*sizeof(int));
-			a = primeTable(size);
-			for(int i = 0;i < size;i++)
-				printf("%d\n",a[i]);
+		primetable(size);
 		}
 		#pragma omp section
 		{
-			double *b = (double*)malloc(size * sizeof(double));
-			b = sineTable(size);
-			for(int i = 0;i < size;i++)
-				printf("%lf\n",b[i]);
+		sinetable(size);
 		}
 	}
-}
+	}
